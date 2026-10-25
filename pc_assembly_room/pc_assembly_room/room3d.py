@@ -16,10 +16,10 @@ REACH=3.0
 ORDER=('motherboard','cpu','ram','storage','cooler','gpu','psu')
 
 class PCAssemblyRoom3D(DirectObject):
- def __init__(self,base,pointer,translator=None,font_path=None,on_complete=None,enhanced=False,difficulty='easy',round_sequence=None):
+ def __init__(self,base,pointer,translator=None,font_path=None,on_complete=None,enhanced=False,difficulty='easy',round_sequence=None,font=None,ui_parent=None):
   super().__init__()
   self.base=base;self._pointer=pointer;self._t=translator or make_translator('en')
-  self._font_path=font_path;self._font=None;self._on_complete=on_complete
+  self._font_path=font_path;self._font=font;self._ui_parent=ui_parent or base.aspect2d;self._on_complete=on_complete
   self._round_sequence=round_sequence if round_sequence is not None else RoundSequence()
   self.round_target=None
   self.difficulty=difficulty;self._parts=available_parts(difficulty);self._enhanced=enhanced
@@ -30,18 +30,18 @@ class PCAssemblyRoom3D(DirectObject):
 
  def enter(self,parent):
   if self._entered:return
-  if self._font_path:self._font=self.base.loader.load_font(Filename.from_os_specific(self._font_path))
+  if self._font is None and self._font_path:self._font=self.base.loader.load_font(Filename.from_os_specific(self._font_path))
   self.state=AssemblyState(self._parts,SLOTS,RULES)
   self.scene=RoomScene3D(parent,self.base.render,self._parts,SLOTS,self._t,self._font,self._enhanced)
   self.scene.configure_level(self.difficulty)
   self._entered=True;self._completed=False;self._carried=None
   for a,b in ((.82,1),(-1,-.65)):
-   self._panels.append(DirectFrame(parent=self.base.aspect2d,frameColor=(.025,.05,.09,.93),frameSize=(-2.5,2.5,a,b)))
-  kw=dict(parent=self.base.aspect2d,fg=(.94,.97,1,1),font=self._font,mayChange=True,align=TextNode.A_center,wordwrap=65)
+   self._panels.append(DirectFrame(parent=self._ui_parent,frameColor=(.025,.05,.09,.93),frameSize=(-2.5,2.5,a,b)))
+  kw=dict(parent=self._ui_parent,fg=(.94,.97,1,1),font=self._font,mayChange=True,align=TextNode.A_center,wordwrap=65)
   positions={'hint':(.967,.028),'status':(.916,.032),'progress':(.855,.032),
              'hover':(-.855,.032),'held':(-.913,.029),'timer':(-.97,.029)}
   for key,(y,scale) in positions.items():self._ui[key]=OnscreenText(text='',pos=(0,y),scale=scale,**kw)
-  self._hint_panel=DirectFrame(parent=self.base.aspect2d,frameColor=(.025,.07,.11,.95),frameSize=(-1.4,1.4,-1,-.65))
+  self._hint_panel=DirectFrame(parent=self._ui_parent,frameColor=(.025,.07,.11,.95),frameSize=(-1.4,1.4,-1,-.65))
   self._hint_panel.hide()
   self._ui['step_list']=OnscreenText(text='',pos=(0,.65),scale=.032,**kw)
   self._ui['hint_detail']=OnscreenText(text='',pos=(0,-.709),scale=.033,**kw)
@@ -49,7 +49,7 @@ class PCAssemblyRoom3D(DirectObject):
   self._ui['cross']=OnscreenText(text='+',pos=(0,-.012),scale=.065,**kw)
   self._ui['hint'].setText(self._t('ui.hint_walk'))
   self._ui['counter']=OnscreenText(text='',pos=(1.10,.93),scale=.062,**kw)
-  self._progress_bar=DirectWaitBar(parent=self.base.aspect2d,range=7,value=0,
+  self._progress_bar=DirectWaitBar(parent=self._ui_parent,range=7,value=0,
       pos=(1.10,0,.86),scale=.32,barColor=(.08,.90,.45,1),
       frameColor=(.12,.20,.28,1),frameSize=(-1,1,-.06,.06))
   self._prepare_round()
@@ -58,14 +58,16 @@ class PCAssemblyRoom3D(DirectObject):
   self._task=self.base.task_mgr.add(self._update,'pc_lab_update_'+str(id(self)))
 
  def exit(self):
-  if not self._entered:return
+  if not self._entered and self.scene is None:return
   self.ignore_all()
   if self._task is not None:self._task.remove();self._task=None
   for ui in self._ui.values():ui.destroy()
   for panel in self._panels:panel.destroy()
-  self._progress_bar.destroy()
-  self._hint_panel.destroy()
-  self._panels=[];self._ui={};self.scene.destroy();self.scene=None;self.state=None
+  if getattr(self,'_progress_bar',None) is not None:self._progress_bar.destroy();self._progress_bar=None
+  if getattr(self,'_hint_panel',None) is not None:self._hint_panel.destroy();self._hint_panel=None
+  self._panels=[];self._ui={}
+  if self.scene is not None:self.scene.destroy();self.scene=None
+  self.state=None
   self._carried=None;self._entered=False
 
  def reset(self):

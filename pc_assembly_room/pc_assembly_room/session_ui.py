@@ -20,9 +20,9 @@ def star(parent,x,z,earned):
     return np
 
 class Panel:
-    def __init__(self,base,t,font=None):
+    def __init__(self,base,t,font=None,parent=None):
         self.t=t;self.font=font
-        self.root=DirectFrame(parent=base.aspect2d,frameColor=(.015,.025,.05,.98),frameSize=(-3,3,-2,2))
+        self.root=DirectFrame(parent=parent or base.aspect2d,frameColor=(.015,.025,.05,.98),frameSize=(-3,3,-2,2))
         self.card=DirectFrame(parent=self.root,frameColor=(.045,.085,.14,1),frameSize=(-1.18,1.18,-.89,.89))
         self.buttons={}
     def label(self,text,z,scale=.06,color=(.94,.97,1,1)):
@@ -37,8 +37,8 @@ class Panel:
     def destroy(self):self.root.destroy()
 
 class ResultPanel(Panel):
-    def __init__(self,base,t,font,result,on_replay,on_menu):
-        super().__init__(base,t,font)
+    def __init__(self,base,t,font,result,on_replay,on_menu,parent=None):
+        super().__init__(base,t,font,parent)
         self.result=dict(result)
         self.stars=trial_stars(result['difficulty'],result['elapsed_seconds'],result['mistakes'])
         self.label(t('result.title'),.70,.085,(.18,1,.58,1))
@@ -54,11 +54,11 @@ class ResultPanel(Panel):
         self.button('menu',t('result.menu'),.53,-.71,on_menu)
 
 class MainMenu(Panel):
-    def __init__(self,base,t,font,on_start,on_quit):
-        super().__init__(base,t,font)
+    def __init__(self,base,t,font,on_start,on_quit,parent=None,exit_key='menu.quit'):
+        super().__init__(base,t,font,parent)
         self.label(t('menu.title'),.64,.085)
         self.label(t('menu.subtitle'),.43,.05)
         for level,z in [('easy',.10),('medium',-.18)]:
             self.button(level,t('level.'+level),0,z,lambda value=level:on_start(value))
         self.label(t('menu.note'),-.53,.035,(.65,.76,.86,1))
-        self.button('quit',t('menu.quit'),0,-.72,on_quit)
+        self.button('quit',t(exit_key),0,-.72,on_quit)
