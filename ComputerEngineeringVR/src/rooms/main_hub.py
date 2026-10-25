@@ -8,10 +8,11 @@ from panda3d.core import AmbientLight, AntialiasAttrib, DirectionalLight, Point3
 from content import STATIONS, TEXT, station_text
 
 class MainHub:
-    def __init__(self, app, font=None):
+    def __init__(self, app, font=None, parent=None):
         self.app = app
         self.font = font
-        self.root = app.render.attachNewNode("main_hub")
+        self.parent = parent or app.render
+        self.root = self.parent.attachNewNode("main_hub")
         self.ui = []
         self.keys = {}
         self.active = False
@@ -238,6 +239,19 @@ class MainHub:
         pale = (0.91, 0.97, 1, 1)
         muted = (0.48, 0.78, 0.9, 1)
         navy = (0.014, 0.045, 0.105, 0.96)
+
+        reset_button = DirectButton(
+            parent=self.app.a2dTopLeft,
+            text="NEW SESSION" if self.language == "en" else "เริ่มรอบใหม่",
+            text_font=self.font,
+            text_fg=(0.91, 0.97, 1, 1),
+            scale=0.042,
+            pos=(0.25, 0, -0.12),
+            frameSize=(-2.6, 2.6, -0.55, 0.65),
+            frameColor=(0.06, 0.43, 0.60, 0.94),
+            command=self.app.reset_session,
+        )
+        self.ui.append(reset_button)
 
         # Floating sign, with a luminous edge and a separate CPE mark.
         title = rectangle(self.app.a2dTopCenter, (0, 0, -0.13),
@@ -535,7 +549,7 @@ class MainHub:
             widget.destroy()
         self.ui.clear()
         self.root.removeNode()
-        self.root = self.app.render.attachNewNode("main_hub")
+        self.root = self.parent.attachNewNode("main_hub")
         for key in ["w", "a", "s", "d", "arrow_left", "arrow_right"]:
             self.app.ignore(key)
             self.app.ignore(key + "-up")
@@ -545,3 +559,8 @@ class MainHub:
         self.app.ignore("mouse3-up")
         self.set_mouse_look(False)
         self.keys.clear()
+
+    def destroy(self):
+        self.exit()
+        if not self.root.isEmpty():
+            self.root.removeNode()

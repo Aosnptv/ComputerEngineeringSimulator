@@ -186,6 +186,7 @@ RESULT_TEXT = {'en': {'play.counter': 'Installed {n}/7',
         'menu.subtitle': 'Choose a difficulty | No time limit',
         'menu.note': 'Standalone room menu. Team Main Hub integration is pending.',
         'menu.quit': 'Exit',
+        'menu.back_hub': 'Back to Main Hub',
         'result.policy': '3 stars: <= {t3} and <= {e3} mistakes\n'
                          '2 stars: <= {t2} and <= {e2} mistakes\n'
                          'Otherwise: 1 star on completion'},
@@ -202,6 +203,7 @@ RESULT_TEXT = {'en': {'play.counter': 'Installed {n}/7',
         'menu.subtitle': 'เลือกระดับความยาก | เล่นได้ไม่จำกัดเวลา',
         'menu.note': 'เมนูตัวทดสอบห้อง ยังไม่ได้เชื่อม Main Hub ของทีม',
         'menu.quit': 'ออกจากโปรแกรม',
+        'menu.back_hub': 'กลับห้องหลัก',
         'result.policy': '3 ดาว: เวลาไม่เกิน {t3} และผิดไม่เกิน {e3} ครั้ง\n'
                          '2 ดาว: เวลาไม่เกิน {t2} และผิดไม่เกิน {e2} ครั้ง\n'
                          'กรณีอื่น: 1 ดาวเมื่อเล่นสำเร็จ'}}
