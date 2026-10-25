@@ -1,0 +1,4 @@
+project-includes = ["src"]
+search-path = ["src"]
+site-packages-path = ["typings"]
+python-interpreter-path = ".venv/Scripts/python.exe"
