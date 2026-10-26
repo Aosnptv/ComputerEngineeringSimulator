@@ -1,0 +1,10 @@
+.godot/
+builds/windows/*
+!builds/windows/.gitkeep
+builds/package/
+builds/smoke-extract/
+builds/visual-qa/
+builds/final-smoke/
+builds/*.zip
+evidence/screenshots/*.png
+

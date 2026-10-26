@@ -1,0 +1,1 @@
+{"easy":{"required":["ram","ssd","gpu","inspection"]},"normal":{"required":["cpu","cooler","ram","ssd","gpu","cpu_power","board_power","inspection"]},"hard":{"required":["cpu","cooler","ram","ssd","gpu","psu","cpu_power","board_power","gpu_power","boot"]}}

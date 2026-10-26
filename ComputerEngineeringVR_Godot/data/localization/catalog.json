@@ -1,0 +1,21 @@
+{
+  "en": {
+    "profile.title": "Player profile", "profile.placeholder": "Student name", "continue": "Continue",
+    "mode.title": "Choose play mode", "mode.desktop": "Desktop — keyboard and mouse", "mode.vr": "VR — OpenXR / SteamVR",
+    "hub.title": "Main Hub", "hub.objective": "Choose a learning laboratory", "hub.help": "Walk to a station and press E, or use these accessible controls.",
+    "difficulty.help": "All levels are unlocked. Choose your guidance level.", "tutorial": "Controls tutorial", "progress": "Progress / results", "progress.empty": "No mission attempts saved yet.",
+    "back": "Back to Hub", "mission.restart": "Restart mission", "mission.hub": "Return to Hub", "mission.started": "Mission started. Interact with the 3D equipment or panel controls.",
+    "results.title": "Mission complete", "results.replay": "Replay", "results.difficulty": "Change difficulty",
+    "controls.desktop": "WASD move • Esc capture/release mouse • E/click interact • H hint"
+  },
+  "th": {
+    "profile.title": "โปรไฟล์ผู้เล่น", "profile.placeholder": "ชื่อนักเรียน", "continue": "ดำเนินการต่อ",
+    "mode.title": "เลือกโหมดการเล่น", "mode.desktop": "เดสก์ท็อป — แป้นพิมพ์และเมาส์", "mode.vr": "VR — OpenXR / SteamVR",
+    "hub.title": "โถงหลัก", "hub.objective": "เลือกห้องปฏิบัติการ", "hub.help": "เดินไปยังสถานีแล้วกด E หรือใช้ปุ่มบนแผงควบคุม",
+    "difficulty.help": "ทุกระดับเปิดให้เล่น เลือกระดับคำแนะนำ", "tutorial": "บทฝึกการควบคุม", "progress": "ความก้าวหน้า / ผลลัพธ์", "progress.empty": "ยังไม่มีผลภารกิจที่บันทึกไว้",
+    "back": "กลับโถงหลัก", "mission.restart": "เริ่มภารกิจใหม่", "mission.hub": "กลับโถงหลัก", "mission.started": "เริ่มภารกิจแล้ว โต้ตอบกับอุปกรณ์ 3 มิติหรือแผงควบคุม",
+    "results.title": "ภารกิจสำเร็จ", "results.replay": "เล่นอีกครั้ง", "results.difficulty": "เปลี่ยนระดับ",
+    "controls.desktop": "WASD เดิน • Esc จับ/ปล่อยเมาส์ • E/คลิก โต้ตอบ • H ขอคำใบ้"
+  }
+}
+

@@ -1,0 +1,2 @@
+{"easy":{"grid":4,"requires":[]},"normal":{"grid":5,"requires":["repeat"]},"hard":{"grid":6,"requires":["if_else","sensor_obstacle_ahead"],"scenario_count":2}}
+

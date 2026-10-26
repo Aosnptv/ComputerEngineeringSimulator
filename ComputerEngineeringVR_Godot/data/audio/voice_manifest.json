@@ -1,0 +1,11 @@
+{
+  "welcome": {"audio":"res://assets/audio/th/welcome.ogg", "th_subtitle":"ยินดีต้อนรับสู่ห้องปฏิบัติการวิศวกรรมคอมพิวเตอร์", "en_subtitle":"Welcome to the Computer Engineering Laboratory."},
+  "tutorial": {"audio":"res://assets/audio/th/tutorial.ogg", "th_subtitle":"มาฝึกการเคลื่อนที่และการโต้ตอบกัน", "en_subtitle":"Let’s practice movement and interaction."},
+  "pc_intro": {"audio":"res://assets/audio/th/pc_intro.ogg", "th_subtitle":"เลือกชิ้นส่วนที่เข้ากันได้แล้วติดตั้งให้ถูกช่อง", "en_subtitle":"Choose compatible parts and install them in the correct slots."},
+  "lan_intro": {"audio":"res://assets/audio/th/lan_intro.ogg", "th_subtitle":"เชื่อมต่ออุปกรณ์และตรวจสอบเครือข่ายจำลอง", "en_subtitle":"Connect the devices and verify the simulated network."},
+  "programming_intro": {"audio":"res://assets/audio/th/programming_intro.ogg", "th_subtitle":"สร้างโปรแกรมเพื่อพาหุ่นยนต์ไปยังเป้าหมาย", "en_subtitle":"Build a program that guides the robot to its goal."},
+  "correct": {"audio":"res://assets/audio/th/correct.ogg", "th_subtitle":"ถูกต้อง ทำต่อได้เลย", "en_subtitle":"Correct. Keep going."},
+  "incorrect": {"audio":"res://assets/audio/th/incorrect.ogg", "th_subtitle":"ยังไม่ถูกต้อง ลองตรวจสอบอีกครั้ง", "en_subtitle":"Not quite. Check the configuration and try again."},
+  "complete": {"audio":"res://assets/audio/th/complete.ogg", "th_subtitle":"ภารกิจสำเร็จ เก่งมาก", "en_subtitle":"Mission complete. Great work."}
+}
+
