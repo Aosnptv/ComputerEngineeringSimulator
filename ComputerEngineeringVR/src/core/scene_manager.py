@@ -36,10 +36,13 @@ class SceneManager:
         if room_id not in self._factories:
             raise KeyError(f"unknown room: {room_id}")
 
+        self._diagnose_transition(self.active_room_id, room_id)
         self._transitioning = True
         try:
             self.close_active()
             self._activate(room_id)
+            self._diagnose("transition.complete", room_id,
+                           self.active_context, self.active_room)
             return True
         except Exception as exc:
             self._cleanup_failed_activation()
@@ -58,17 +61,24 @@ class SceneManager:
 
     def close_active(self) -> None:
         room, context = self.active_room, self.active_context
+        room_id = self.active_room_id
         self.active_room = None
         self.active_context = None
         self.active_room_id = None
         self.session.current_room = ""
         try:
             if room is not None:
+                self._diagnose("room.exit.before", room_id, context, room)
                 room.exit()
+                self._diagnose("room.exit.after", room_id, context, room)
+                self._diagnose("room.unload.before", room_id, context, room)
                 room.unload()
+                self._diagnose("room.unload.after", room_id, context, room)
         finally:
             if context is not None:
+                self._diagnose("context.close.before", room_id, context, room)
                 context.close()
+                self._diagnose("context.close.after", room_id, context, room)
 
     def reset_active(self) -> None:
         if self.active_room is not None:
@@ -97,8 +107,13 @@ class SceneManager:
         room = self._factories[room_id]()
         self.active_room = room
         self.active_room_id = room_id
+        self._diagnose("room.load.before", room_id, context, room)
         room.load(context)
+        self._diagnose("room.load.after", room_id, context, room,
+                       track={f"adapter:{room_id}": room})
+        self._diagnose("room.enter.before", room_id, context, room)
         room.enter()
+        self._diagnose("room.enter.after", room_id, context, room)
         self.session.current_room = room_id
 
     def _record_result(self, result: RoomResult) -> None:
@@ -122,4 +137,17 @@ class SceneManager:
         finally:
             if context is not None:
                 context.close()
+
+    def _diagnose_transition(self, source, destination) -> None:
+        diagnostics = getattr(self.app, "resource_diagnostics", None)
+        if diagnostics is not None:
+            diagnostics.transition_begin(source, destination)
+
+    def _diagnose(self, phase, room_id, context=None, room=None, **kwargs) -> None:
+        diagnostics = getattr(self.app, "resource_diagnostics", None)
+        if diagnostics is not None:
+            diagnostics.snapshot(
+                phase, scene_name=room_id or "", context=context, room=room,
+                **kwargs,
+            )
 

@@ -133,6 +133,31 @@ class LANGameLogic:
     def evaluate(self, time_left):
         return self.evaluate_final_score(time_left)
 
+    def evaluate_elapsed(self, elapsed_seconds):
+        """Score an integrated, count-up attempt without a time-out."""
+        color_correct = self.check_pin_correctness()
+        if not color_correct:
+            self.errors_count += 1
+
+        target = {"easy": 120, "medium": 90, "hard": 60}[self.difficulty]
+        if color_correct and self.errors_count == 0 and elapsed_seconds <= target * 0.6:
+            stars, rank = 3, "ยอดเยี่ยม (Perfect!)"
+        elif color_correct and self.errors_count <= 1 and elapsed_seconds <= target:
+            stars, rank = 2, "ดี (Good Job!)"
+        else:
+            stars, rank = 1, "ผ่านเกณฑ์ (Practice Needed)"
+
+        return {
+            "success": True,
+            "stars": stars,
+            "message": (
+                "🎉 ผ่านภารกิจสำเร็จ!\n"
+                f"มาตรฐานที่ใช้: {self.target_standard}\n"
+                f"เวลาที่ใช้: {int(elapsed_seconds)} วินาที\n"
+                f"ระดับประเมิน: {rank}"
+            ),
+        }
+
     def evaluate_final_score(self, time_left):
         if time_left <= 0:
             return {"success": False, "stars": 0, "message": "❌ หมดเวลา! ไม่สามารถทำภารกิจได้ทัน"}

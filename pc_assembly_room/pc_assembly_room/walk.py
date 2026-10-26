@@ -28,9 +28,7 @@ class FirstPersonController:
             self._obj.accept(k, self._set, [k, True])
             self._obj.accept(k + "-up", self._set, [k, False])
         base.disable_mouse()
-        props = WindowProperties()
-        props.set_cursor_hidden(True)
-        base.win.request_properties(props)
+        self._set_cursor_locked(True)
         self._task = base.task_mgr.add(self._update, "walk_update")
         self._apply()
 
@@ -39,8 +37,11 @@ class FirstPersonController:
         self._skip = 2
         for key in self._keys:
             self._keys[key] = False
+        self._set_cursor_locked(enabled)
+
+    def _set_cursor_locked(self, locked):
         props = WindowProperties()
-        props.set_cursor_hidden(enabled)
+        props.set_cursor_hidden(locked)
         self.base.win.request_properties(props)
 
     def _set(self, key, value):
@@ -102,9 +103,7 @@ class FirstPersonController:
         if self._task is not None:
             self._task.remove()
             self._task = None
-        props = WindowProperties()
-        props.set_cursor_hidden(False)
-        self.base.win.request_properties(props)
+        self._set_cursor_locked(False)
 
 
 class FirstPersonPointer:

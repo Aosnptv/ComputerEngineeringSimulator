@@ -14,6 +14,18 @@ from .round_sequence import RoundSequence
 
 REACH=3.0
 ORDER=('motherboard','cpu','ram','storage','cooler','gpu','psu')
+TOP_HUD_LAYOUT={
+ 'hint':(.970,.021),
+ 'status':(.910,.023),
+ 'progress':(.850,.021),
+}
+BOTTOM_HUD_LAYOUT={
+ 'hover':(-.855,.032),
+ 'held':(-.913,.029),
+ 'timer':(-.970,.029),
+}
+COUNTER_LAYOUT=((1.16,.942),.048)
+PROGRESS_BAR_POS=(1.16,0,.850)
 
 class PCAssemblyRoom3D(DirectObject):
  def __init__(self,base,pointer,translator=None,font_path=None,on_complete=None,enhanced=False,difficulty='easy',round_sequence=None,font=None,ui_parent=None):
@@ -37,9 +49,8 @@ class PCAssemblyRoom3D(DirectObject):
   self._entered=True;self._completed=False;self._carried=None
   for a,b in ((.82,1),(-1,-.65)):
    self._panels.append(DirectFrame(parent=self._ui_parent,frameColor=(.025,.05,.09,.93),frameSize=(-2.5,2.5,a,b)))
-  kw=dict(parent=self._ui_parent,fg=(.94,.97,1,1),font=self._font,mayChange=True,align=TextNode.A_center,wordwrap=65)
-  positions={'hint':(.967,.028),'status':(.916,.032),'progress':(.855,.032),
-             'hover':(-.855,.032),'held':(-.913,.029),'timer':(-.97,.029)}
+  kw=dict(parent=self._ui_parent,fg=(.94,.97,1,1),font=self._font,mayChange=True,align=TextNode.A_center,wordwrap=90)
+  positions={**TOP_HUD_LAYOUT,**BOTTOM_HUD_LAYOUT}
   for key,(y,scale) in positions.items():self._ui[key]=OnscreenText(text='',pos=(0,y),scale=scale,**kw)
   self._hint_panel=DirectFrame(parent=self._ui_parent,frameColor=(.025,.07,.11,.95),frameSize=(-1.4,1.4,-1,-.65))
   self._hint_panel.hide()
@@ -48,9 +59,10 @@ class PCAssemblyRoom3D(DirectObject):
   self._ui['hint_help']=OnscreenText(text='',pos=(0,-.71),scale=.031,**kw)
   self._ui['cross']=OnscreenText(text='+',pos=(0,-.012),scale=.065,**kw)
   self._ui['hint'].setText(self._t('ui.hint_walk'))
-  self._ui['counter']=OnscreenText(text='',pos=(1.10,.93),scale=.062,**kw)
+  counter_pos,counter_scale=COUNTER_LAYOUT
+  self._ui['counter']=OnscreenText(text='',pos=counter_pos,scale=counter_scale,**kw)
   self._progress_bar=DirectWaitBar(parent=self._ui_parent,range=7,value=0,
-      pos=(1.10,0,.86),scale=.32,barColor=(.08,.90,.45,1),
+      pos=PROGRESS_BAR_POS,scale=.28,barColor=(.08,.90,.45,1),
       frameColor=(.12,.20,.28,1),frameSize=(-1,1,-.06,.06))
   self._prepare_round()
   self.accept(self._pointer.activate_event,self._on_click)

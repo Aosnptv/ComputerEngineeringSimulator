@@ -3,11 +3,14 @@
 from dataclasses import dataclass, field
 from typing import Set, Tuple
 
-from config import (
-    GRID_SIZE,
-)
-from core.levels import LEVELS
-from core.difficulty import level_for_difficulty
+try:
+    from ..config import GRID_SIZE
+    from .levels import LEVELS
+    from .difficulty import level_for_difficulty
+except ImportError:
+    from config import GRID_SIZE
+    from core.levels import LEVELS
+    from core.difficulty import level_for_difficulty
 
 DIRECTIONS = ("N", "E", "S", "W")
 

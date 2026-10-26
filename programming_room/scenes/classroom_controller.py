@@ -20,11 +20,10 @@ from direct.gui.DirectGui import (
     DirectButton,
 )
 
-from core.exploration import (
-    PLAYER_START,
-    can_walk,
-    interaction_at,
-)
+try:
+    from ..core.exploration import PLAYER_START, can_walk, interaction_at
+except ImportError:
+    from core.exploration import PLAYER_START, can_walk, interaction_at
 
 
 class ClassroomController:
@@ -141,6 +140,19 @@ class ClassroomController:
         )
         self.exit_button.hide()
 
+        self.console_button = DirectButton(
+            parent=app.aspect2d,
+            text="OPEN PROGRAMMING CONSOLE",
+            pos=(-1.00, 0, 0.76),
+            scale=0.045,
+            frameSize=(-3.6, 3.6, -0.55, 0.55),
+            frameColor=(0.31, 0.55, 0.88, 0.94),
+            text_fg=(1, 1, 1, 1),
+            relief=1,
+            command=app.open_computer_from_menu,
+        )
+        self.console_button.hide()
+
         # ======================================
         # KEYBOARD EVENTS
         # ======================================
@@ -201,6 +213,7 @@ class ClassroomController:
 
         self.guide.show()
         self.exit_button.show()
+        self.console_button.show()
 
         self.stop_mouse_look()
 
@@ -218,6 +231,7 @@ class ClassroomController:
 
         self.guide.hide()
         self.exit_button.hide()
+        self.console_button.hide()
         self.interact_button.hide()
 
         self.stop_mouse_look()

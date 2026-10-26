@@ -4,8 +4,12 @@ from collections import deque
 from dataclasses import replace
 from functools import lru_cache
 
-from config import GRID_SIZE
-from core.levels import LEVELS
+try:
+    from ..config import GRID_SIZE
+    from .levels import LEVELS
+except ImportError:
+    from config import GRID_SIZE
+    from core.levels import LEVELS
 
 HEADINGS = ("N", "E", "S", "W")
 MOVES = ((0, 1), (1, 0), (0, -1), (-1, 0))

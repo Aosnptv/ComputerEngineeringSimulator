@@ -140,8 +140,8 @@ def create_station_desk(parent, pos, desk_color, station_num):
     return desk_group
 
 
-def build_room(base_app, difficulty="easy"):
-    room_node = base_app.render.attachNewNode("VirtualLabRoom3D")
+def build_room(base_app, difficulty="easy", parent=None):
+    room_node = (parent or base_app.render).attachNewNode("VirtualLabRoom3D")
     font = base_app.thai_font
 
     if hasattr(base_app, "camLens"):

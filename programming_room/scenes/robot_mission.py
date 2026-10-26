@@ -1,9 +1,10 @@
 
 from panda3d.core import NodePath
 
-from config import (
-    GRID_SIZE,
-)
+try:
+    from ..config import GRID_SIZE
+except ImportError:
+    from config import GRID_SIZE
 
 
 class RobotMissionScene:

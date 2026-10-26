@@ -8,15 +8,20 @@ from lan_logic import COLOR_HEX_MAP, T568B_CORRECT_ORDER, T568A_CORRECT_ORDER, E
 
 
 class LANGameUI:
-    def __init__(self, app, logic, timer=None, player=None):
+    def __init__(self, app, logic, timer=None, player=None, parent=None,
+                 on_exit=None, on_complete=None, on_started=None):
         self.app = app
         self.logic = logic
         self.timer = timer
         self.player = player
+        self.parent = parent or app.aspect2d
+        self.on_exit = on_exit or self.show_difficulty_menu
+        self.on_complete = on_complete
+        self.on_started = on_started
 
         self.selected_color = None
         self.active_station = None
-        self.time_left = 120
+        self.elapsed_seconds = 0.0
         self.is_timer_running = False
 
         self.st1_ready = False
@@ -103,6 +108,7 @@ class LANGameUI:
             bg_tex = TexturePool.loadTexture("textures/lab_bg.jpg")
 
         self.bg_frame = DirectFrame(
+            parent=self.parent,
             frameSize=(-1.78, 1.78, -1.0, 1.0), pos=(0, 0, 0),
             frameTexture=bg_tex if bg_tex else None,
             frameColor=(1, 1, 1, 1) if bg_tex else (0.08, 0.1, 0.15, 1)
@@ -121,36 +127,37 @@ class LANGameUI:
         )
 
         DirectButton(
-            parent=self.difficulty_frame, text="ง่าย (Easy - เวลา 120 วินาที | มีเส้นนำทาง )",
+            parent=self.difficulty_frame, text="ง่าย (Easy | มีเส้นนำทาง)",
             scale=0.046, command=self.start_game, extraArgs=["easy"], pos=(0, 0, 0.12),
             frameColor=(0.1, 0.75, 0.35, 1), text_fg=(1, 1, 1, 1), **self.font_kwargs()
         )
         DirectButton(
-            parent=self.difficulty_frame, text="ปานกลาง (Medium - เวลา 90 วินาที | ไร้เส้นนำทาง )",
+            parent=self.difficulty_frame, text="ปานกลาง (Medium | ไร้เส้นนำทาง)",
             scale=0.046, command=self.start_game, extraArgs=["medium"], pos=(0, 0, -0.06),
             frameColor=(0.9, 0.6, 0.0, 1), text_fg=(1, 1, 1, 1), **self.font_kwargs()
         )
         DirectButton(
-            parent=self.difficulty_frame, text="ยาก (Hard - เวลา 60 วินาที | ซ่อนคำใบ้ | สุ่ม )",
+            parent=self.difficulty_frame, text="ยาก (Hard | ซ่อนคำใบ้ | สุ่ม)",
             scale=0.046, command=self.start_game, extraArgs=["hard"], pos=(0, 0, -0.24),
             frameColor=(0.85, 0.15, 0.15, 1), text_fg=(1, 1, 1, 1), **self.font_kwargs()
         )
 
         DirectButton(
-            parent=self.difficulty_frame, text=" ออกจากเกม (Exit Game)", scale=0.045,
+            parent=self.difficulty_frame, text=" กลับห้องหลัก (Main Hub)", scale=0.045,
             pos=(0, 0, -0.42), frameColor=(0.4, 0.1, 0.1, 1), text_fg=(1, 1, 1, 1),
-            command=sys.exit, **self.font_kwargs()
+            command=self.on_exit, **self.font_kwargs()
         )
 
     def build_mission_tracker_ui(self):
         self.tracker_frame = DirectFrame(
+            parent=self.parent,
             frameColor=(0.02, 0.05, 0.12, 0.85),
             frameSize=(-0.40, 0.40, -0.45, 0.45), pos=(-1.35, 0, 0.45)
         )
         self.tracker_frame.hide()
 
         self.timer_label = DirectLabel(
-            parent=self.tracker_frame, text="เวลาคงเหลือ: 00:00", text_scale=0.038,
+            parent=self.tracker_frame, text="เวลาที่ใช้: 00:00", text_scale=0.038,
             text_fg=(1.0, 0.8, 0.2, 1), frameColor=(0, 0, 0, 0),
             pos=(-0.36, 0, 0.38), text_align=0, **self.font_kwargs()
         )
@@ -171,9 +178,10 @@ class LANGameUI:
             self.tracker_labels.append(lbl)
 
         self.hud_exit_btn = DirectButton(
+            parent=self.parent,
             text=" ออกจากห้อง (Exit)", scale=0.04, pos=(1.35, 0, 0.88),
             frameColor=(0.7, 0.15, 0.15, 0.9), text_fg=(1, 1, 1, 1),
-            command=self.show_difficulty_menu, **self.font_kwargs()
+            command=self.on_exit, **self.font_kwargs()
         )
         self.hud_exit_btn.hide()
 
@@ -192,6 +200,7 @@ class LANGameUI:
 
     def build_info_card_ui(self):
         self.info_card_frame = DirectFrame(
+            parent=self.parent,
             frameSize=(-0.55, 0.55, -0.40, 0.40), pos=(0, 0, 0.1),
             frameColor=(0.04, 0.08, 0.18, 0.95)
         )
@@ -245,6 +254,7 @@ class LANGameUI:
 
     def build_game_ui(self):
         self.game_frame = DirectFrame(
+            parent=self.parent,
             frameColor=(0.02, 0.05, 0.12, 0.95),
             frameSize=(-0.95, 0.95, -0.32, 0.32), pos=(0, 0, -0.62)
         )
@@ -286,6 +296,7 @@ class LANGameUI:
 
     def build_result_ui(self):
         self.result_frame = DirectFrame(
+            parent=self.parent,
             frameColor=(0.04, 0.08, 0.18, 0.96),
             frameSize=(-0.85, 0.85, -0.5, 0.5), pos=(0, 0, 0)
         )
@@ -322,7 +333,7 @@ class LANGameUI:
         DirectButton(
             parent=self.result_frame, text=" กลับสู่เมนูหลัก (ออกจากห้อง)", scale=0.055,
             pos=(0, 0, -0.28), frameColor=(0.85, 0.2, 0.2, 1), text_fg=(1, 1, 1, 1),
-            command=self.show_difficulty_menu, **self.font_kwargs()
+            command=self.on_exit, **self.font_kwargs()
         )
 
     def hide_all(self):
@@ -343,12 +354,15 @@ class LANGameUI:
         if hasattr(self.app, 'reload_room'): self.app.reload_room(level)
         self.logic.set_difficulty(level)
         
-        self.time_left = float(self.logic.max_time)
+        self.elapsed_seconds = 0.0
         self.is_timer_running = True
         
         if hasattr(self.app, 'taskMgr'):
             self.app.taskMgr.remove("timer_task")
             self.app.taskMgr.add(self.update_timer_task, "timer_task")
+
+        if self.on_started:
+            self.on_started(level)
 
         self.tracker_frame.show()
         if hasattr(self, 'hud_exit_btn'): self.hud_exit_btn.show()
@@ -359,17 +373,10 @@ class LANGameUI:
             return task.done
 
         dt = globalClock.getDt()
-        self.time_left -= dt
-
-        if self.time_left <= 0:
-            self.time_left = 0
-            self.is_timer_running = False
-            self.on_time_out()
-            return task.done
-
-        mins = int(self.time_left) // 60
-        secs = int(self.time_left) % 60
-        self.timer_label["text"] = f"เวลาคงเหลือ: {mins:02d}:{secs:02d}"
+        self.elapsed_seconds += dt
+        mins = int(self.elapsed_seconds) // 60
+        secs = int(self.elapsed_seconds) % 60
+        self.timer_label["text"] = f"เวลาที่ใช้: {mins:02d}:{secs:02d}"
         return task.cont
 
     def stop_timer(self):
@@ -642,6 +649,7 @@ class LANGameUI:
             self.st_desc_label["text"] = "ต้องกดทำขั้นตอน (1. ปอก -> 2. คลายเกลียว -> 3. รีดสาย) ให้ครบ!"
             return
         elif st == 4 and not self.logic.check_pin_correctness():
+            self.logic.errors_count += 1
             self.st_desc_label["text"] = f"การเรียงสี Pin 1-8 ยังไม่ถูกต้องตามมาตรฐาน {self.logic.target_standard}!"
             return
         elif st == 5 and not all(self.st5_steps.values()):
@@ -666,7 +674,7 @@ class LANGameUI:
             self.st_desc_label["text"] = f"ภารกิจสถานีที่ {st} สำเร็จแล้ว! ปลดล็อกสถานีที่ {st + 1} เรียบร้อย เดินไปทำต่อได้เลย"
 
     def finish_game(self):
-        res = self.logic.evaluate(self.time_left)
+        res = self.logic.evaluate_elapsed(self.elapsed_seconds)
         self.stop_timer()
         self.game_frame.hide()
 
@@ -686,3 +694,27 @@ class LANGameUI:
         msg_text = res.get("message", "")
         self.result_text["text"] = msg_text
         self.result_frame.show()
+        if self.on_complete:
+            self.on_complete({
+                "difficulty": self.logic.difficulty,
+                "elapsed_seconds": self.elapsed_seconds,
+                "mistakes": self.logic.errors_count,
+                "stars": stars_count,
+            })
+
+    def set_paused(self, paused):
+        self.is_timer_running = not paused and self.logic.current_station > 0
+        if paused:
+            self.app.taskMgr.remove("timer_task")
+        elif not self.result_frame.isHidden():
+            self.is_timer_running = False
+        else:
+            self.app.taskMgr.remove("timer_task")
+            self.app.taskMgr.add(self.update_timer_task, "timer_task")
+
+    def destroy(self):
+        self.stop_timer()
+        for frame in (self.bg_frame, self.game_frame, self.result_frame,
+                      self.info_card_frame, self.tracker_frame, self.hud_exit_btn):
+            if frame is not None:
+                frame.destroy()

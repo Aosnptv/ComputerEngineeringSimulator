@@ -27,27 +27,26 @@ from direct.gui.DirectGui import (
     DirectLabel,
 )
 
-from config import ANIMATION_DELAY
-from core.scoring import Attempt
-from core.program_flow import ProgramRunner
-from core.levels import LEVELS
-from core.mission import RobotMission
-from core.validator import (
+from .config import ANIMATION_DELAY
+from .core.scoring import Attempt
+from .core.program_flow import ProgramRunner
+from .core.levels import LEVELS
+from .core.mission import RobotMission
+from .core.validator import (
     CommandValidator,
     MissingBlockPuzzle,
 )
 
-from scenes.programming_room import ProgrammingRoom
-from scenes.robot_mission import RobotMissionScene
-from scenes.classroom_controller import ClassroomController
-from scenes.vr_panel import VRProgrammingPanel
-from scenes.main_hub import MainHub, HubController
-from ui.block_editor import BlockEditor
+from .scenes.programming_room import ProgrammingRoom
+from .scenes.robot_mission import RobotMissionScene
+from .scenes.classroom_controller import ClassroomController
+from .scenes.vr_panel import VRProgrammingPanel
+from .scenes.main_hub import MainHub, HubController
+from .ui.block_editor import BlockEditor
 
 
 loadPrcFileData(
     "",
-    "window-title Programming Room\n"
     "win-size 1280 800\n"
     "sync-video true\n"
     "show-frame-rate-meter false"
@@ -56,8 +55,31 @@ loadPrcFileData(
 
 class ProgrammingLab(ShowBase):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, host_app=None, context=None, on_complete=None):
+        self.embedded = host_app is not None
+        self.integration_context = context
+        self.on_complete = on_complete
+        if not self.embedded:
+            super().__init__()
+        else:
+            if context is None:
+                raise ValueError("embedded ProgrammingLab requires a RoomContext")
+            self.render = context.scene_root
+            self.aspect2d = context.ui_root
+            self.camera = host_app.camera
+            self.cam = host_app.cam
+            self.camLens = host_app.camLens
+            self.loader = host_app.loader
+            self.taskMgr = host_app.taskMgr
+            self.mouseWatcherNode = host_app.mouseWatcherNode
+            self.clock = host_app.clock
+            self.win = host_app.win
+            self.disableMouse = host_app.disableMouse
+            self.setBackgroundColor = host_app.setBackgroundColor
+            self.accept = lambda event, method, extraArgs=None: context.input_scope.bind(
+                event, method, extraArgs or []
+            )
+            self.userExit = lambda: context.navigate("hub")
 
         self.disableMouse()
         self.setBackgroundColor(0.78, 0.88, 1.0, 1)
@@ -104,10 +126,11 @@ class ProgrammingLab(ShowBase):
             self.hub
         )
 
-        self.accept(
-            "escape",
-            self.show_pause_screen
-        )
+        if not self.embedded:
+            self.accept(
+                "escape",
+                self.show_pause_screen
+            )
 
         self.accept(
             "r",
@@ -121,6 +144,8 @@ class ProgrammingLab(ShowBase):
 
         # Start game at Main Hub.
         self.show_main_hub()
+        if self.embedded:
+            self.show_room()
 
     # ==================================================
     # LIGHTING
@@ -157,6 +182,7 @@ class ProgrammingLab(ShowBase):
     def create_interface(self):
 
         self.title = DirectLabel(
+            parent=self.aspect2d,
             text="Programming Room",
             pos=(0, 0, 0.91),
             scale=0.065,
@@ -165,6 +191,7 @@ class ProgrammingLab(ShowBase):
         )
 
         self.room_button = DirectButton(
+            parent=self.aspect2d,
             text="BACK TO CLASSROOM",
             pos=(-1.05, 0, 0.76),
             scale=0.05,
@@ -173,6 +200,7 @@ class ProgrammingLab(ShowBase):
         )
 
         self.mission_button = DirectButton(
+            parent=self.aspect2d,
             text="SELECT LEVEL",
             pos=(-0.58, 0, 0.76),
             scale=0.05,
@@ -181,6 +209,7 @@ class ProgrammingLab(ShowBase):
         )
 
         self.status_label = DirectLabel(
+            parent=self.aspect2d,
             text="Explore the classroom!",
             pos=(0, 0, -0.89),
             scale=0.042,
@@ -189,6 +218,7 @@ class ProgrammingLab(ShowBase):
         )
 
         self.help_button = DirectButton(
+            parent=self.aspect2d,
             text="? HOW TO PLAY",
             pos=(-1.04, 0, 0.63),
             scale=0.051,
@@ -243,6 +273,7 @@ class ProgrammingLab(ShowBase):
         self.tutorial_frame.hide()
 
         self.score_label = DirectLabel(
+            parent=self.aspect2d,
             text="Score: 0",
             pos=(0.15, 0, 0.76),
             scale=0.046,
@@ -252,6 +283,7 @@ class ProgrammingLab(ShowBase):
 
         # Programming panel on the right.
         self.mission_ui = DirectFrame(
+            parent=self.aspect2d,
             pos=(1.20, 0, 0.08),
             frameSize=(-0.30, 0.30, -0.90, 0.67),
             frameColor=(0.95, 0.97, 1, 0.97),
@@ -286,6 +318,7 @@ class ProgrammingLab(ShowBase):
         )
 
         self.demo_button = DirectButton(
+            parent=self.aspect2d,
             text="LOAD DEMO",
             pos=(-1.08, 0, -0.08),
             scale=0.052,
@@ -294,6 +327,7 @@ class ProgrammingLab(ShowBase):
         )
 
         self.puzzle_ui = DirectFrame(
+            parent=self.aspect2d,
             pos=(-1.05, 0, -0.43),
             frameSize=(-0.37, 0.37, -0.39, 0.37),
             frameColor=(0.95, 0.96, 1, 0.96),
@@ -342,6 +376,7 @@ class ProgrammingLab(ShowBase):
             self.puzzle_buttons.append(button)
 
         self.overlay = DirectFrame(
+            parent=self.aspect2d,
             frameSize=(-1.4, 1.4, -0.82, 0.82),
             frameColor=(0.94, 0.97, 1, 0.97),
         )
@@ -909,6 +944,14 @@ class ProgrammingLab(ShowBase):
                 index + 2
             )
         )
+
+        if self.on_complete:
+            self.on_complete({
+                "difficulty": self.vr_panel.difficulty.lower(),
+                "elapsed_seconds": elapsed,
+                "mistakes": mistakes,
+                "stars": stars,
+            })
 
         self.current_scene = "result"
 
@@ -1505,6 +1548,22 @@ class ProgrammingLab(ShowBase):
         ):
 
             self.block_editor.finish_drag()
+
+    def destroy_embedded(self):
+        """Release tasks and DirectObject bindings owned by an embedded lab."""
+        self.stop_animation()
+        if hasattr(self, "vr_panel"):
+            self.vr_panel.close(silent=True)
+        if hasattr(self, "classroom"):
+            self.classroom.disable()
+        if hasattr(self, "hub_controller"):
+            self.hub_controller.disable()
+            self.hub_controller.ignoreAll()
+        for task_name in (
+            "classroom_walk", "main_hub_walk", "robot_animation",
+            "show_mission_result",
+        ):
+            self.taskMgr.remove(task_name)
 
     def check_puzzle(self, command):
 

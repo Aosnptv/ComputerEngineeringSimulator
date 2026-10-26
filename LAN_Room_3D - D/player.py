@@ -25,8 +25,11 @@ def create_cube_3d(parent, pos, scale, color):
 
 
 class PlayerController:
-    def __init__(self, base_app):
+    def __init__(self, base_app, parent=None, input_scope=None, ui=None):
         self.app = base_app
+        self.ui = ui
+        self.input_scope = input_scope
+        self.enabled = True
         self.move_speed = 12.0
         self.mouse_sens = 0.25
 
@@ -52,7 +55,7 @@ class PlayerController:
         }
         self.nearby_station = None
 
-        self.bot = self.app.render.attachNewNode("PlayerBot")
+        self.bot = (parent or self.app.render).attachNewNode("PlayerBot")
         self.bot.setPos(0, -8, 0)
 
         create_cube_3d(self.bot, pos=Vec3(0, 0, 0.9), scale=Vec3(0.6, 0.4, 0.8), color=Vec4(0.1, 0.45, 0.75, 1))
@@ -66,21 +69,27 @@ class PlayerController:
 
         for key, name in [("w", "up"), ("s", "down"), ("a", "left"), ("d", "right"),
                           ("arrow_up", "up"), ("arrow_down", "down"), ("arrow_left", "left"), ("arrow_right", "right")]:
-            self.app.accept(key, self.set_key, [name, True])
-            self.app.accept(f"{key}-up", self.set_key, [name, False])
+            self._bind(key, self.set_key, [name, True])
+            self._bind(f"{key}-up", self.set_key, [name, False])
 
-        self.app.accept("mouse1", self.start_drag)
-        self.app.accept("mouse1-up", self.stop_drag)
-        self.app.accept("mouse3", self.start_drag)
-        self.app.accept("mouse3-up", self.stop_drag)
+        self._bind("mouse1", self.start_drag)
+        self._bind("mouse1-up", self.stop_drag)
+        self._bind("mouse3", self.start_drag)
+        self._bind("mouse3-up", self.stop_drag)
 
-        self.app.accept("wheel_up", self.zoom, [-2.0])
-        self.app.accept("wheel_down", self.zoom, [2.0])
+        self._bind("wheel_up", self.zoom, [-2.0])
+        self._bind("wheel_down", self.zoom, [2.0])
 
-        self.app.taskMgr.add(self.update_controller, "UpdateControllerTask")
+        self.task = self.app.taskMgr.add(self.update_controller, "lan_player_controller")
+
+    def _bind(self, event, method, args=None):
+        if self.input_scope is not None:
+            self.input_scope.bind(event, method, args)
+        else:
+            self.app.accept(event, method, args or [])
 
     def set_key(self, key, state):
-        self.key_map[key] = state
+        self.key_map[key] = state if self.enabled else False
 
     def start_drag(self):
         self.is_dragging = True
@@ -95,11 +104,12 @@ class PlayerController:
         self.cam_distance = max(3.0, min(35.0, self.cam_distance + amount))
 
     def check_nearby_stations(self):
-        if not hasattr(self.app, 'ui') or not self.app.ui:
+        ui = self.ui or getattr(self.app, "ui", None)
+        if ui is None:
             return
 
-        if (self.app.ui.bg_frame and not self.app.ui.bg_frame.isHidden()) or \
-           (self.app.ui.result_frame and not self.app.ui.result_frame.isHidden()):
+        if (ui.bg_frame and not ui.bg_frame.isHidden()) or \
+           (ui.result_frame and not ui.result_frame.isHidden()):
             return
 
         bot_pos = self.bot.getPos()
@@ -114,15 +124,17 @@ class PlayerController:
 
         if closest_st and closest_st != self.nearby_station:
             self.nearby_station = closest_st
-            if self.app.ui.logic.can_access_station(closest_st):
-                self.app.ui.open_station_ui(closest_st)
+            if ui.logic.can_access_station(closest_st):
+                ui.open_station_ui(closest_st)
             else:
-                self.app.ui.close_station_ui()
+                ui.close_station_ui()
         elif not closest_st and self.nearby_station is not None:
             self.nearby_station = None
-            self.app.ui.close_station_ui()
+            ui.close_station_ui()
 
     def update_controller(self, task):
+        if not self.enabled:
+            return task.cont
         dt = self.app.clock.getDt()
 
         move_vec = Vec3(0, 0, 0)
@@ -166,3 +178,24 @@ class PlayerController:
         self.check_nearby_stations()
 
         return task.cont
+
+    def set_enabled(self, enabled):
+        self.enabled = enabled
+        self.is_dragging = False
+        if not enabled:
+            for key in self.key_map:
+                self.key_map[key] = False
+
+    def reset(self):
+        self.bot.setPos(0, -8, 0)
+        self.cam_heading = 0.0
+        self.cam_pitch = -25.0
+        self.nearby_station = None
+
+    def destroy(self):
+        self.set_enabled(False)
+        if self.task is not None:
+            self.task.remove()
+            self.task = None
+        if not self.bot.isEmpty():
+            self.bot.removeNode()

@@ -22,6 +22,12 @@ class HubAdapter(Room):
     def _on_enter(self):
         self.hub.enter(self.context.language)
 
+    def _on_pause(self):
+        self.hub.pause()
+
+    def _on_resume(self):
+        self.hub.resume()
+
     def _on_exit(self):
         self.hub.exit()
 

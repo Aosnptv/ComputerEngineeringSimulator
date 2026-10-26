@@ -3,7 +3,7 @@ import math
 
 from direct.gui.DirectGui import DirectButton, DirectFrame, DirectLabel
 from direct.task import Task
-from panda3d.core import AmbientLight, AntialiasAttrib, DirectionalLight, Point3, TextNode, TransparencyAttrib
+from panda3d.core import AmbientLight, AntialiasAttrib, ClockObject, DirectionalLight, Point3, TextNode, TransparencyAttrib
 
 from content import STATIONS, TEXT, station_text
 
@@ -22,6 +22,7 @@ class MainHub:
         self.last_mouse = None
         self.language = "en"
         self.nearby = None
+        self.interaction_ready_at = 0.0
 
     def box(self, name, pos, scale, color, parent=None):
         model = self.app.loader.loadModel("models/box")
@@ -46,15 +47,27 @@ class MainHub:
 
     def build_lighting(self):
         self.root.setAntialias(AntialiasAttrib.MAuto)
-        ambient = AmbientLight("soft_ambient")
-        ambient.setColor((0.42, 0.51, 0.64, 1))
-        self.root.setLight(self.root.attachNewNode(ambient))
+        # Panda3D render states retain references to light NodePaths.  Creating
+        # new lights on every Hub visit therefore grows native driver handles
+        # on the Intel/WGL renderer even after the scene root is removed.
+        # These immutable lights belong to the application renderer and are
+        # intentionally shared by every short-lived MainHub instance.
+        lights = getattr(self.app, "_main_hub_shared_lights", None)
+        if lights is None:
+            owner = self.app.render.attachNewNode("shared:main_hub_lights")
+            ambient = AmbientLight("soft_ambient")
+            ambient.setColor((0.42, 0.51, 0.64, 1))
+            ambient_node = owner.attachNewNode(ambient)
 
-        sun = DirectionalLight("lab_key_light")
-        sun.setColor((0.48, 0.56, 0.67, 1))
-        sun_node = self.root.attachNewNode(sun)
-        sun_node.setHpr(-35, -55, 0)
-        self.root.setLight(sun_node)
+            sun = DirectionalLight("lab_key_light")
+            sun.setColor((0.48, 0.56, 0.67, 1))
+            sun_node = owner.attachNewNode(sun)
+            sun_node.setHpr(-35, -55, 0)
+            lights = (ambient_node, sun_node)
+            self.app._main_hub_shared_lights = lights
+
+        for light in lights:
+            self.root.setLight(light)
 
     def build_environment(self):
         self.box("Floor", (0, 0, -0.2),
@@ -390,14 +403,17 @@ class MainHub:
 
     def click_computer(self):
         if (not self.active or self.mouse_look or
-                hasattr(self.app, "minigame_menu")):
+                hasattr(self.app, "minigame_menu") or
+                ClockObject.getGlobalClock().getFrameTime() < self.interaction_ready_at):
             return
         watcher = self.app.mouseWatcherNode
         if watcher is not None and watcher.hasMouse() and self.computer_screen_hit(watcher.getMouse()):
             self.open_minigames()
 
     def interact(self):
-        if not self.active or hasattr(self.app, "minigame_menu") or self.nearby is None:
+        if (not self.active or hasattr(self.app, "minigame_menu") or
+                self.nearby is None or
+                ClockObject.getGlobalClock().getFrameTime() < self.interaction_ready_at):
             return
         if self.nearby == "robot":
             self.guide_label["text"] = TEXT[self.language]["robot_message"]
@@ -447,7 +463,7 @@ class MainHub:
 
     def update(self, task):
         if not self.active:
-            return Task.done
+            return Task.cont
         if hasattr(self.app, "minigame_menu"):
             self.last_mouse = None
             return Task.cont
@@ -504,11 +520,22 @@ class MainHub:
 
         return Task.cont
 
+    def pause(self):
+        self.active = False
+        self.set_mouse_look(False)
+        self.keys.clear()
+
+    def resume(self):
+        self.active = True
+        self.last_mouse = None
+        self.interaction_ready_at = ClockObject.getGlobalClock().getFrameTime() + 0.35
+
     def enter(self, language="en"):
         if self.active:
             return
 
         self.active = True
+        self.interaction_ready_at = ClockObject.getGlobalClock().getFrameTime() + 0.35
         self.language = language if language in TEXT else "en"
         self.yaw = 0.0
         self.pitch = -7.0

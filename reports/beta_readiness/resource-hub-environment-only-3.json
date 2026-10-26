@@ -1,0 +1,121 @@
+{
+  "scenario": "hub",
+  "hub_variant": "environment_only",
+  "cycles": 3,
+  "frames_per_state": 3,
+  "python": "3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]",
+  "renderer": "Intel(R) UHD Graphics 630",
+  "vendor": "Intel",
+  "average_probe_fps": 364.9596497502344,
+  "samples": [
+    {
+      "label": "baseline.hub",
+      "private_bytes": 50806784,
+      "working_set_bytes": 104255488,
+      "handles": 903,
+      "gdi_handles": 4,
+      "user_handles": 7,
+      "other_handles": 892,
+      "tasks": 9,
+      "events": 20,
+      "listeners": 20,
+      "render_descendants": 143,
+      "aspect2d_descendants": 19,
+      "prepared": {
+        "total": 2,
+        "geoms": 0,
+        "textures": 0,
+        "vertex_buffers": 1,
+        "index_buffers": 1,
+        "shaders": 0
+      }
+    },
+    {
+      "label": "cycle.1.hub",
+      "private_bytes": 51105792,
+      "working_set_bytes": 105013248,
+      "handles": 908,
+      "gdi_handles": 4,
+      "user_handles": 8,
+      "other_handles": 896,
+      "tasks": 9,
+      "events": 20,
+      "listeners": 20,
+      "render_descendants": 143,
+      "aspect2d_descendants": 19,
+      "prepared": {
+        "total": 2,
+        "geoms": 0,
+        "textures": 0,
+        "vertex_buffers": 1,
+        "index_buffers": 1,
+        "shaders": 0
+      }
+    },
+    {
+      "label": "cycle.2.hub",
+      "private_bytes": 51150848,
+      "working_set_bytes": 105369600,
+      "handles": 919,
+      "gdi_handles": 4,
+      "user_handles": 23,
+      "other_handles": 892,
+      "tasks": 9,
+      "events": 20,
+      "listeners": 20,
+      "render_descendants": 143,
+      "aspect2d_descendants": 19,
+      "prepared": {
+        "total": 2,
+        "geoms": 0,
+        "textures": 0,
+        "vertex_buffers": 1,
+        "index_buffers": 1,
+        "shaders": 0
+      }
+    },
+    {
+      "label": "cycle.3.hub",
+      "private_bytes": 51187712,
+      "working_set_bytes": 105394176,
+      "handles": 919,
+      "gdi_handles": 4,
+      "user_handles": 24,
+      "other_handles": 891,
+      "tasks": 9,
+      "events": 20,
+      "listeners": 20,
+      "render_descendants": 143,
+      "aspect2d_descendants": 19,
+      "prepared": {
+        "total": 2,
+        "geoms": 0,
+        "textures": 0,
+        "vertex_buffers": 1,
+        "index_buffers": 1,
+        "shaders": 0
+      }
+    }
+  ],
+  "delta": {
+    "private_bytes": 380928,
+    "working_set_bytes": 1138688,
+    "handles": 16,
+    "gdi_handles": 0,
+    "user_handles": 17,
+    "other_handles": -1,
+    "tasks": 0,
+    "events": 0,
+    "listeners": 0,
+    "render_descendants": 0,
+    "aspect2d_descendants": 0,
+    "prepared": {
+      "total": 0,
+      "geoms": 0,
+      "textures": 0,
+      "vertex_buffers": 0,
+      "index_buffers": 0,
+      "shaders": 0
+    }
+  }
+}

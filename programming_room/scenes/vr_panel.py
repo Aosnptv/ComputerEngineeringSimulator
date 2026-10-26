@@ -11,11 +11,18 @@ from direct.gui.DirectGui import (
 )
 from direct.gui import DirectGuiGlobals as DGG
 
-from core.lessons import COMMANDS, LESSONS, check_answer
-from core.code_runner import COMMAND_EXAMPLES, validate_single_code
-from core.scoring import Attempt
-from core.activity_session import ActivitySession
-from ui.text_layout import fitted_scale
+try:
+    from ..core.lessons import COMMANDS, LESSONS, check_answer
+    from ..core.code_runner import COMMAND_EXAMPLES, validate_single_code
+    from ..core.scoring import Attempt
+    from ..core.activity_session import ActivitySession
+    from ..ui.text_layout import fitted_scale
+except ImportError:
+    from core.lessons import COMMANDS, LESSONS, check_answer
+    from core.code_runner import COMMAND_EXAMPLES, validate_single_code
+    from core.scoring import Attempt
+    from core.activity_session import ActivitySession
+    from ui.text_layout import fitted_scale
 
 
 class VRProgrammingPanel:

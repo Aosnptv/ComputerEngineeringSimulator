@@ -1,8 +1,13 @@
 # core/validator.py
 
-from config import COMMANDS, MAX_COMMANDS
-from core.mission import RobotMission
-from core.program_flow import ProgramRunner
+try:
+    from ..config import COMMANDS, MAX_COMMANDS
+    from .mission import RobotMission
+    from .program_flow import ProgramRunner
+except ImportError:
+    from config import COMMANDS, MAX_COMMANDS
+    from core.mission import RobotMission
+    from core.program_flow import ProgramRunner
 
 
 class CommandValidator:

@@ -12,11 +12,10 @@ from direct.gui.DirectGui import (
 
 from direct.gui import DirectGuiGlobals as DGG
 
-from core.lessons import (
-    COMMANDS,
-    LESSONS,
-    check_answer,
-)
+try:
+    from ..core.lessons import COMMANDS, LESSONS, check_answer
+except ImportError:
+    from core.lessons import COMMANDS, LESSONS, check_answer
 
 
 # =====================================================

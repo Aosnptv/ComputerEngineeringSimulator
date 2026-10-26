@@ -1,6 +1,9 @@
 """Safe block-based IF/ELSE interpreter for robot missions."""
 
-from config import COMMANDS, MAX_COMMANDS
+try:
+    from ..config import COMMANDS, MAX_COMMANDS
+except ImportError:
+    from config import COMMANDS, MAX_COMMANDS
 
 MOVEMENT_COMMANDS = ("FORWARD", "TURN_LEFT", "TURN_RIGHT")
 

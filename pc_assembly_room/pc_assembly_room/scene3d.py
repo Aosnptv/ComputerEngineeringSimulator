@@ -4,7 +4,8 @@ from panda3d.core import (Point3, TextNode, CollisionNode, CollisionBox,
 from .scene import make_box, PICK_MASK, NO_MASK
 from .models import make_cylinder,build_part, DEFAULT_TRAY_HPR, TRAY_HPR, HOLD_HPR
 from .logic import Kind
-from .lab_visuals import surface_box,stone_texture,technical_texture,material,setup_lights,wire_box
+from .lab_visuals import (surface_box,stone_texture,technical_texture,material,
+                          setup_lights,wire_box,diagnostic_increment)
 
 START_POS=(0,1.5)
 ROOM_X=(-4.5,4.5)
@@ -36,6 +37,7 @@ DISPLAY_SCALE={Kind.CPU:4.4,Kind.RAM:2.8,Kind.MOTHERBOARD:1.6,
 
 class RoomScene3D:
  def __init__(self,parent,render,parts,slots,translator,font=None,enhanced=False):
+  diagnostic_increment('room_scene')
   self.root=parent.attach_new_node('pc_lab')
   self._stone=stone_texture();self._blueprint=technical_texture()
   self._materials={}
@@ -68,6 +70,7 @@ class RoomScene3D:
   return np
 
  def _text(self,key,pos,scale=.08,parent=None,hpr=None,width=25):
+  diagnostic_increment('text_node')
   tn=TextNode(key);tn.set_text(self._t(key));tn.set_align(TextNode.A_center)
   tn.set_text_color(.9,.96,1,1);tn.set_wordwrap(width)
   if self._font is not None:tn.set_font(self._font)
@@ -78,6 +81,7 @@ class RoomScene3D:
   self._labels.append((tn,key));return np
 
  def _pick_box(self,np,size,center,tag):
+  diagnostic_increment('collision_node')
   cn=CollisionNode(tag);cn.add_solid(CollisionBox(Point3(*center),*(v/2 for v in size)))
   cn.set_from_collide_mask(NO_MASK);cn.set_into_collide_mask(PICK_MASK)
   cnp=np.attach_new_node(cn);cnp.set_tag('pick',tag);return cn

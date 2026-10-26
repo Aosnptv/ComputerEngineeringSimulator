@@ -1,11 +1,23 @@
 """Local procedural surfaces and lighting. No external assets or dependencies."""
 import math
+import os
 import random
 from panda3d.core import (Texture,PNMImage,GeomVertexData,GeomVertexFormat,GeomVertexWriter,
     BitMask32,Material,AmbientLight,DirectionalLight,PointLight,LineSegs)
 from .scene import make_box
 
+_DIAGNOSTICS_ENABLED = os.environ.get('CES_RESOURCE_DIAGNOSTICS') == '1'
+_RESOURCE_COUNTS = {}
+
+def diagnostic_increment(name,count=1):
+    if _DIAGNOSTICS_ENABLED:
+        _RESOURCE_COUNTS[name]=_RESOURCE_COUNTS.get(name,0)+count
+
+def get_diagnostic_resource_counts():
+    return {'supported':True,'enabled':_DIAGNOSTICS_ENABLED,'created':dict(_RESOURCE_COUNTS)}
+
 def surface_box(size,color,texture=None):
+    diagnostic_increment('surface_box')
     node=make_box('lab_surface',size,color)
     if texture is not None:
         geom=node.modify_geom(0)
@@ -17,6 +29,7 @@ def surface_box(size,color,texture=None):
     return node
 
 def stone_texture():
+    diagnostic_increment('stone_texture')
     rng=random.Random(2701)
     image=PNMImage(256,256,3)
     for y in range(256):
@@ -31,6 +44,7 @@ def stone_texture():
     return texture
 
 def technical_texture():
+    diagnostic_increment('technical_texture')
     image=PNMImage(512,256,3);image.fill(.035,.075,.13)
     def line(x0,y0,x1,y1,color=(.15,.48,.70)):
         steps=max(abs(x1-x0),abs(y1-y0),1)
@@ -51,23 +65,33 @@ def technical_texture():
     return texture
 
 def material(name,shine=24,color=(1,1,1,1)):
+    diagnostic_increment('material')
     m=Material(name);m.set_diffuse(color);m.set_ambient(color)
     m.set_specular((.28,.30,.33,1));m.set_shininess(shine)
     return m
 
 def setup_lights(root,render):
-    ambient=AmbientLight('lab_ambient');ambient.set_color((.55,.57,.62,1))
-    root.set_light(root.attach_new_node(ambient))
-    for name,h,p,color in [('key',-35,-65,(.70,.68,.64,1)),('fill',140,-35,(.28,.34,.42,1))]:
-        light=DirectionalLight(name);light.set_color(color)
-        np=root.attach_new_node(light);np.set_hpr(h,p,0);root.set_light(np)
-    # Conventional lighting avoids driver-specific shader requirements.
-    for x in (-3.1,3.1):
-        light=PointLight('blue_accent');light.set_color((.015,.10,.30,1))
-        light.set_attenuation((1,0,.8));np=root.attach_new_node(light);np.set_pos(x,4.5,1)
-        root.set_light(np)
+    diagnostic_increment('light',5)
+    # Panda3D render states retain references to light NodePaths.  Recreating
+    # five lights for every short-lived room produces a new native state for
+    # every procedural Geom on Intel/WGL.  Keep the immutable lights under the
+    # shared renderer and apply them only to this room root.
+    owner=render.find('shared:pc_assembly_lights')
+    if owner.is_empty():
+        owner=render.attach_new_node('shared:pc_assembly_lights')
+        ambient=AmbientLight('lab_ambient');ambient.set_color((.55,.57,.62,1))
+        owner.attach_new_node(ambient)
+        for name,h,p,color in [('key',-35,-65,(.70,.68,.64,1)),('fill',140,-35,(.28,.34,.42,1))]:
+            light=DirectionalLight(name);light.set_color(color)
+            np=owner.attach_new_node(light);np.set_hpr(h,p,0)
+        # Conventional lighting avoids driver-specific shader requirements.
+        for x in (-3.1,3.1):
+            light=PointLight('blue_accent');light.set_color((.015,.10,.30,1))
+            light.set_attenuation((1,0,.8));np=owner.attach_new_node(light);np.set_pos(x,4.5,1)
+    for light in owner.get_children():root.set_light(light)
 
 def wire_box(size):
+    diagnostic_increment('wire_box')
     hx,hy,hz=(v/2 for v in size)
     vertices=[(x,y,z) for x in (-hx,hx) for y in (-hy,hy) for z in (-hz,hz)]
     lines=LineSegs('socket_outline');lines.set_thickness(2.5);lines.set_color(1,1,1,1)

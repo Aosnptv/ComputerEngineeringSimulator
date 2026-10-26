@@ -1,0 +1,239 @@
+{
+  "scenario": "hub",
+  "hub_variant": "empty",
+  "cycles": 10,
+  "frames_per_state": 3,
+  "python": "3.14.6 (tags/v3.14.6:c63aec6, Jun 10 2026, 10:26:10) [MSC v.1944 64 bit (AMD64)]",
+  "renderer": "Intel(R) UHD Graphics 630",
+  "vendor": "Intel",
+  "average_probe_fps": 1077.6366667600228,
+  "samples": [
+    {
+      "label": "baseline.hub",
+      "private_bytes": 48816128,
+      "working_set_bytes": 92196864,
+      "handles": 449,
+      "tasks": 9,
+      "events": 20,
+      "listeners": 20,
+      "render_descendants": 5,
+      "aspect2d_descendants": 19,
+      "prepared": {
+        "total": 0,
+        "geoms": 0,
+        "textures": 0,
+        "vertex_buffers": 0,
+        "index_buffers": 0,
+        "shaders": 0
+      }
+    },
+    {
+      "label": "cycle.1.hub",
+      "private_bytes": 48816128,
+      "working_set_bytes": 92336128,
+      "handles": 449,
+      "tasks": 9,
+      "events": 20,
+      "listeners": 20,
+      "render_descendants": 5,
+      "aspect2d_descendants": 19,
+      "prepared": {
+        "total": 0,
+        "geoms": 0,
+        "textures": 0,
+        "vertex_buffers": 0,
+        "index_buffers": 0,
+        "shaders": 0
+      }
+    },
+    {
+      "label": "cycle.2.hub",
+      "private_bytes": 48816128,
+      "working_set_bytes": 92487680,
+      "handles": 449,
+      "tasks": 9,
+      "events": 20,
+      "listeners": 20,
+      "render_descendants": 5,
+      "aspect2d_descendants": 19,
+      "prepared": {
+        "total": 0,
+        "geoms": 0,
+        "textures": 0,
+        "vertex_buffers": 0,
+        "index_buffers": 0,
+        "shaders": 0
+      }
+    },
+    {
+      "label": "cycle.3.hub",
+      "private_bytes": 48865280,
+      "working_set_bytes": 92753920,
+      "handles": 460,
+      "tasks": 9,
+      "events": 20,
+      "listeners": 20,
+      "render_descendants": 5,
+      "aspect2d_descendants": 19,
+      "prepared": {
+        "total": 0,
+        "geoms": 0,
+        "textures": 0,
+        "vertex_buffers": 0,
+        "index_buffers": 0,
+        "shaders": 0
+      }
+    },
+    {
+      "label": "cycle.4.hub",
+      "private_bytes": 48898048,
+      "working_set_bytes": 92786688,
+      "handles": 460,
+      "tasks": 9,
+      "events": 20,
+      "listeners": 20,
+      "render_descendants": 5,
+      "aspect2d_descendants": 19,
+      "prepared": {
+        "total": 0,
+        "geoms": 0,
+        "textures": 0,
+        "vertex_buffers": 0,
+        "index_buffers": 0,
+        "shaders": 0
+      }
+    },
+    {
+      "label": "cycle.5.hub",
+      "private_bytes": 48898048,
+      "working_set_bytes": 92790784,
+      "handles": 460,
+      "tasks": 9,
+      "events": 20,
+      "listeners": 20,
+      "render_descendants": 5,
+      "aspect2d_descendants": 19,
+      "prepared": {
+        "total": 0,
+        "geoms": 0,
+        "textures": 0,
+        "vertex_buffers": 0,
+        "index_buffers": 0,
+        "shaders": 0
+      }
+    },
+    {
+      "label": "cycle.6.hub",
+      "private_bytes": 48898048,
+      "working_set_bytes": 92889088,
+      "handles": 460,
+      "tasks": 9,
+      "events": 20,
+      "listeners": 20,
+      "render_descendants": 5,
+      "aspect2d_descendants": 19,
+      "prepared": {
+        "total": 0,
+        "geoms": 0,
+        "textures": 0,
+        "vertex_buffers": 0,
+        "index_buffers": 0,
+        "shaders": 0
+      }
+    },
+    {
+      "label": "cycle.7.hub",
+      "private_bytes": 48898048,
+      "working_set_bytes": 92893184,
+      "handles": 460,
+      "tasks": 9,
+      "events": 20,
+      "listeners": 20,
+      "render_descendants": 5,
+      "aspect2d_descendants": 19,
+      "prepared": {
+        "total": 0,
+        "geoms": 0,
+        "textures": 0,
+        "vertex_buffers": 0,
+        "index_buffers": 0,
+        "shaders": 0
+      }
+    },
+    {
+      "label": "cycle.8.hub",
+      "private_bytes": 48898048,
+      "working_set_bytes": 92893184,
+      "handles": 460,
+      "tasks": 9,
+      "events": 20,
+      "listeners": 20,
+      "render_descendants": 5,
+      "aspect2d_descendants": 19,
+      "prepared": {
+        "total": 0,
+        "geoms": 0,
+        "textures": 0,
+        "vertex_buffers": 0,
+        "index_buffers": 0,
+        "shaders": 0
+      }
+    },
+    {
+      "label": "cycle.9.hub",
+      "private_bytes": 48898048,
+      "working_set_bytes": 92893184,
+      "handles": 460,
+      "tasks": 9,
+      "events": 20,
+      "listeners": 20,
+      "render_descendants": 5,
+      "aspect2d_descendants": 19,
+      "prepared": {
+        "total": 0,
+        "geoms": 0,
+        "textures": 0,
+        "vertex_buffers": 0,
+        "index_buffers": 0,
+        "shaders": 0
+      }
+    },
+    {
+      "label": "cycle.10.hub",
+      "private_bytes": 48898048,
+      "working_set_bytes": 92893184,
+      "handles": 460,
+      "tasks": 9,
+      "events": 20,
+      "listeners": 20,
+      "render_descendants": 5,
+      "aspect2d_descendants": 19,
+      "prepared": {
+        "total": 0,
+        "geoms": 0,
+        "textures": 0,
+        "vertex_buffers": 0,
+        "index_buffers": 0,
+        "shaders": 0
+      }
+    }
+  ],
+  "delta": {
+    "private_bytes": 81920,
+    "working_set_bytes": 696320,
+    "handles": 11,
+    "tasks": 0,
+    "events": 0,
+    "listeners": 0,
+    "render_descendants": 0,
+    "aspect2d_descendants": 0,
+    "prepared": {
+      "total": 0,
+      "geoms": 0,
+      "textures": 0,
+      "vertex_buffers": 0,
+      "index_buffers": 0,
+      "shaders": 0
+    }
+  }
+}

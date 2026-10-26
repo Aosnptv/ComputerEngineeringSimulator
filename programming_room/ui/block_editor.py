@@ -2,7 +2,10 @@
 
 from direct.gui.DirectGui import DirectButton, DirectLabel
 from direct.gui import DirectGuiGlobals as DGG
-from config import COMMANDS, MAX_COMMANDS
+try:
+    from ..config import COMMANDS, MAX_COMMANDS
+except ImportError:
+    from config import COMMANDS, MAX_COMMANDS
 
 
 class BlockEditor:

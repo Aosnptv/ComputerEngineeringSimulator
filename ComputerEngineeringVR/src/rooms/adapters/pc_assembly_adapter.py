@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 
-from direct.gui.DirectGui import DirectButton
+from direct.gui.DirectGui import DirectButton, DirectFrame, DirectLabel
 from panda3d.core import WindowProperties
 
 from core.asset_paths import enable_room_package_imports
@@ -59,7 +59,8 @@ class PCAssemblyAdapter(Room):
         self.controller = None
         self.menu = None
         self.result_panel = None
-        self.back_button = None
+        self.navigation_hint = None
+        self.navigation_panel = None
         self.difficulty = None
 
     def _on_load(self):
@@ -68,6 +69,7 @@ class PCAssemblyAdapter(Room):
 
     def _on_enter(self):
         self.context.input_scope.bind("r", self.reset)
+        self.context.input_scope.bind("tab", self._toggle_navigation)
         self._show_menu()
 
     def _on_reset(self):
@@ -75,6 +77,14 @@ class PCAssemblyAdapter(Room):
             self._show_menu()
         else:
             self._start(self.difficulty)
+
+    def _on_pause(self):
+        if self.controller is not None:
+            self.controller.set_enabled(False)
+
+    def _on_resume(self):
+        if self.controller is not None and self.result_panel is None:
+            self.controller.set_enabled(True)
 
     def _on_exit(self):
         self._cleanup_ui()
@@ -127,18 +137,25 @@ class PCAssemblyAdapter(Room):
                 bounds=self.room.scene.walk_bounds,
                 obstacles=self.room.scene.walk_obstacles,
             )
+            self._diagnose(
+                "pc.activity.started",
+                track={
+                    "pc.room": self.room,
+                    "pc.scene": self.room.scene,
+                    "pc.controller": self.controller,
+                },
+            )
             self.context.app.camLens.setFov(75)
             self.context.app.camLens.setNearFar(0.05, 50)
-            self.back_button = DirectButton(
+            self.navigation_hint = DirectLabel(
                 parent=self.context.ui_root,
-                text="BACK TO HUB" if self.context.language == "en" else "กลับห้องหลัก",
+                text="NAVIGATION [TAB]" if self.context.language == "en" else "เมนูนำทาง [TAB]",
                 text_font=self.font,
-                scale=0.045,
-                pos=(1.20, 0, 0.90),
-                frameSize=(-2.8, 2.8, -0.55, 0.65),
-                frameColor=(0.06, 0.43, 0.60, 0.96),
-                text_fg=(1, 1, 1, 1),
-                command=lambda: self.context.navigate("hub"),
+                scale=0.034,
+                pos=(-1.16, 0, 0.94),
+                frameSize=(-3.6, 3.6, -0.62, 0.72),
+                frameColor=(0.025, 0.07, 0.11, 0.96),
+                text_fg=(0.40, 0.90, 1.0, 1),
             )
         except Exception as exc:
             self._cleanup_ui()
@@ -164,6 +181,7 @@ class PCAssemblyAdapter(Room):
             completed=True,
         )
         self.context.complete(result)
+        self._destroy_navigation_ui()
         if self.controller is not None:
             self.controller.set_enabled(False)
         self._set_cursor(True)
@@ -178,23 +196,123 @@ class PCAssemblyAdapter(Room):
         )
 
     def _cleanup_ui(self):
-        for name in ("menu", "result_panel", "back_button"):
+        for name in ("menu", "result_panel", "navigation_hint", "navigation_panel"):
             widget = getattr(self, name)
             if widget is not None:
                 widget.destroy()
                 setattr(self, name, None)
 
+    def _toggle_navigation(self):
+        if self.controller is None or self.room is None or self.result_panel is not None:
+            return
+        if self.navigation_panel is None:
+            self._show_navigation_menu()
+        else:
+            self._hide_navigation_menu()
+
+    def _show_navigation_menu(self):
+        if self.navigation_panel is not None:
+            return
+        self.controller.set_enabled(False)
+        self._set_cursor(True)
+        title = "NAVIGATION" if self.context.language == "en" else "เมนูนำทาง"
+        subtitle = (
+            "First-person controls are paused"
+            if self.context.language == "en"
+            else "หยุดการควบคุมมุมมองชั่วคราว"
+        )
+        resume = "RESUME" if self.context.language == "en" else "เล่นต่อ"
+        back = "BACK TO MAIN HUB" if self.context.language == "en" else "กลับห้องหลัก"
+        self.navigation_panel = DirectFrame(
+            parent=self.context.ui_root,
+            frameColor=(0.008, 0.02, 0.04, 0.82),
+            frameSize=(-1.78, 1.78, -1, 1),
+        )
+        card = DirectFrame(
+            parent=self.navigation_panel,
+            frameColor=(0.025, 0.07, 0.11, 0.98),
+            frameSize=(-0.68, 0.68, -0.48, 0.48),
+        )
+        DirectLabel(
+            parent=card,
+            text=title,
+            text_font=self.font,
+            text_scale=0.075,
+            pos=(0, 0, 0.28),
+            frameColor=(0, 0, 0, 0),
+            text_fg=(0.94, 0.97, 1, 1),
+        )
+        DirectLabel(
+            parent=card,
+            text=subtitle,
+            text_font=self.font,
+            text_scale=0.038,
+            pos=(0, 0, 0.14),
+            frameColor=(0, 0, 0, 0),
+            text_fg=(0.40, 0.90, 1.0, 1),
+        )
+        button_style = dict(
+            parent=card,
+            text_font=self.font,
+            scale=0.06,
+            frameSize=(-5.2, 5.2, -0.62, 0.72),
+            frameColor=(0.06, 0.43, 0.60, 0.98),
+            text_fg=(1, 1, 1, 1),
+            relief=1,
+        )
+        DirectButton(text=resume, pos=(0, 0, -0.03), command=self._hide_navigation_menu, **button_style)
+        DirectButton(text=back, pos=(0, 0, -0.25), command=self._navigate_hub, **button_style)
+
+    def _hide_navigation_menu(self):
+        if self.navigation_panel is not None:
+            self.navigation_panel.destroy()
+            self.navigation_panel = None
+        if self.controller is not None and self.result_panel is None:
+            self.controller.set_enabled(True)
+            self._set_cursor(False)
+
+    def _destroy_navigation_ui(self):
+        if self.navigation_panel is not None:
+            self.navigation_panel.destroy()
+            self.navigation_panel = None
+        if self.navigation_hint is not None:
+            self.navigation_hint.destroy()
+            self.navigation_hint = None
+
+    def _navigate_hub(self):
+        self.context.navigate("hub")
+
     def _cleanup_activity(self):
+        self._diagnose(
+            "pc.activity.cleanup.before",
+            track={
+                "pc.room": self.room,
+                "pc.scene": getattr(self.room, "scene", None),
+                "pc.controller": self.controller,
+            },
+        )
         if self.controller is not None:
             self.controller.destroy()
             self.controller = None
         if self.room is not None:
             self.room.exit()
             self.room = None
+        self._diagnose("pc.activity.cleaned")
+
+    def _diagnose(self, phase, **kwargs):
+        diagnostics = getattr(self.context.app, "resource_diagnostics", None)
+        if diagnostics is not None:
+            diagnostics.snapshot(
+                phase,
+                scene_name=self.room_id,
+                context=self.context,
+                room=self,
+                **kwargs,
+            )
 
     def _set_cursor(self, visible):
         app = self.context.app
-        if app.win is None:
+        if app.win is None or not hasattr(app.win, "requestProperties"):
             return
         properties = WindowProperties()
         properties.setCursorHidden(not visible)
